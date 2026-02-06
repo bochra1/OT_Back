@@ -126,7 +126,7 @@ model OTIntervenant {
 //   name      String
 //   label     String
 //   type      FieldType
-//   required  Boolean   @default(false)
+//   required  Boolean   @default(false) 
 //   options   Json?
 //   order     Int
 //   filePath  String?   // chemin du fichier si type = FILE
