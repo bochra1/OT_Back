@@ -53,7 +53,7 @@ model OTRequest {
   action       String?
   workDate     DateTime?
   contactTT    String?
-  impact       String?
+  impact       String? 
   comment      String?
   status       String    @default("OPEN")
   priority     String?
