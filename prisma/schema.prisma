@@ -1,0 +1,156 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Team {
+  id    String @id @default(uuid())
+  name  String @unique
+  users User[]
+}
+
+model User {
+  id       String     @id @default(uuid())
+  name     String
+  email    String     @unique
+  role     String     // ex: "IP", "CC-DATA", "DATA"
+  teamId   String?
+  team     Team?      @relation(fields: [teamId], references: [id])
+  oTs      OTRequest[]
+  intervenedOTs OTIntervenant[]
+  assignedIntervenants OTIntervenant[] @relation("AssignedBy")
+  startedOTs OTRequest[] @relation("StartedBy")
+  closedOTs OTRequest[] @relation("ClosedBy")
+}
+model OTAttachment {
+  id        String   @id @default(uuid())
+  otId      String
+  ot        OTRequest @relation(fields: [otId], references: [id])
+
+  filename  String
+  filepath  String
+  mimetype  String
+  size      Int
+
+  uploadedAt DateTime @default(now())
+}
+
+model OTRequest {
+  id           String    @id @default(uuid())
+  lotNumber    String    // ex: "IP.001.2026"
+  title        String
+  workPlace    String?
+  action       String?
+  workDate     DateTime?
+  contactTT    String?
+  impact       String?
+  comment      String?
+  status       String    @default("OPEN")
+  priority     String?
+  rejectionReason String?
+  startedAt    DateTime?
+  startedById  String?
+  startedBy    User?     @relation("StartedBy", fields: [startedById], references: [id])
+  closedAt     DateTime?
+  closedById   String?
+  closedBy     User?     @relation("ClosedBy", fields: [closedById], references: [id])
+  customFields Json?     // [{name, value}]
+  attachments  OTAttachment[]  
+  creatorId    String
+  creator      User      @relation(fields: [creatorId], references: [id])
+  intervenants OTIntervenant[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OTIntervenant {
+  id        String    @id @default(uuid())
+  otId      String
+  ot        OTRequest  @relation(fields: [otId], references: [id])
+  userId    String
+  user      User       @relation(fields: [userId], references: [id])
+  assignedById String?
+  assignedBy   User?     @relation("AssignedBy", fields: [assignedById], references: [id])
+  role      String?
+  assignedAt DateTime  @default(now())
+
+  @@index([otId])
+  @@index([userId])
+}
+
+// model WorkOrder {
+//   id          Int      @id @default(autoincrement())
+//   title       String
+//   workPlace   String?
+//   action      String?
+//   workDate    DateTime?
+//   contactTT   String?
+//   intervenant String?
+//   impact      String?
+//   comment     String?
+//   status      String
+//   priotity    String?
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+// }
+// enum FieldType {
+//   TEXT
+//   TEXTAREA
+//   SELECT
+//   NUMBER
+//   DATE
+//   CHECKBOX
+//   FILE
+// }
+// model Region {
+//   id   String @id @default(uuid())
+//   code String @unique
+//   name String
+// }
+
+// model OTField {
+//   id        String    @id @default(uuid())
+//   otTypeId  String
+//   otType    OTType    @relation(fields: [otTypeId], references: [id])
+//   name      String
+//   label     String
+//   type      FieldType
+//   required  Boolean   @default(false)
+//   options   Json?
+//   order     Int
+//   filePath  String?   // chemin du fichier si type = FILE
+//   createdAt DateTime  @default(now())
+// }
+
+
+// model OTRequest {
+//   id        String   @id @default(uuid())
+//   otTypeId String
+//   otType   OTType   @relation(fields: [otTypeId], references: [id])
+
+//   values    Json
+//   status    String  @default("PENDING")
+
+//   createdAt DateTime @default(now())
+// }
+// model OTType {
+//   id        String     @id @default(uuid())
+//   code      String     @unique
+//   label     String
+//   isActive  Boolean    @default(true)
+//   fields    OTField[]
+//   requests  OTRequest[]
+//   createdAt DateTime   @default(now())
+//   updatedAt DateTime   @updatedAt
+// }
